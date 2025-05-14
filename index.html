@@ -1,0 +1,326 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Technical Idea - IT Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #ff6b6b;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .hero-section {
+            background: url('https://source.unsplash.com/random/1920x1080/?technology') no-repeat center/cover;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 58, 138, 0.7);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        .btn-cta {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        @media (max-width: 640px) {
+            .hero-text {
+                font-size: 2.5rem;
+            }
+            .nav-menu {
+                display: none;
+            }
+            .nav-menu.active {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white bg-opacity-90 shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-blue-500">The Technical Idea</a>
+                </div>
+                <div class="flex items-center sm:hidden">
+                    <button id="menu-toggle" class="text-gray-800 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <div class="hidden sm:flex sm:items-center space-x-8 nav-menu">
+                    <a href="index.html" class="nav-link text-gray-800 font-semibold">Home</a>
+                    <a href="about.html" class="nav-link text-gray-800 font-semibold">About</a>
+                    <a href="services.html" class="nav-link text-gray-800 font-semibold">Services</a>
+                    <a href="portfolio.html" class="nav-link text-gray-800 font-semibold">Portfolio</a>
+                    <a href="contact.html" class="nav-link text-gray-800 font-semibold">Contact</a>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden sm:hidden bg-white bg-opacity-90 shadow-lg">
+            <div class="flex flex-col space-y-4 p-4">
+                <a href="index.html" class="nav-link text-gray-800 font-semibold">Home</a>
+                <a href="about.html" class="nav-link text-gray-800 font-semibold">About</a>
+                <a href="services.html" class="nav-link text-gray-800 font-semibold">Services</a>
+                <a href="portfolio.html" class="nav-link text-gray-800 font-semibold">Portfolio</a>
+                <a href="contact.html" class="nav-link text-gray-800 font-semibold">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-white py-40 relative">
+        <div id="particles-js"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 class="hero-text text-4xl sm:text-6xl font-bold mb-6 animate-hero">Empowering Your Future with IT Innovation</h1>
+            <p class="text-lg sm:text-2xl mb-8 animate-hero-delay">Unlock your business potential with our cutting-edge solutions.</p>
+            <a href="contact.html" class="btn-cta text-white px-8 py-4 rounded-full font-semibold text-lg">Get Started Now</a>
+        </div>
+    </section>
+
+    <!-- Services Overview -->
+    <section class="py-24 bg-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-5xl font-bold text-center mb-16 text-gray-800">Our Core Services</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-8 rounded-xl text-center">
+                    <i class="fas fa-cloud text-5xl text-red-500 mb-6"></i>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Cloud Solutions</h3>
+                    <p class="text-gray-600">Scalable, secure cloud infrastructure for seamless operations.</p>
+                </div>
+                <div class="card p-8 rounded-xl text-center">
+                    <i class="fas fa-code text-5xl text-blue-500 mb-6"></i>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Custom Software</h3>
+                    <p class="text-gray-600">Bespoke applications tailored to your business goals.</p>
+                </div>
+                <div class="card p-8 rounded-xl text-center">
+                    <i class="fas fa-shield-alt text-5xl text-green-500 mb-6"></i>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Cybersecurity</h3>
+                    <p class="text-gray-600">Robust protection against evolving digital threats.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="py-24 bg-white bg-opacity-80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-5xl font-bold text-center mb-16 text-gray-800">Why Partner with Us?</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-12">
+                <div class="flex items-start space-x-6 animate-feature">
+                    <i class="fas fa-check-circle text-4xl text-red-500"></i>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Expert Team</h3>
+                        <p class="text-gray-600">Certified professionals with deep industry expertise.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-6 animate-feature">
+                    <i class="fas fa-rocket text-4xl text-blue-500"></i>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Innovative Solutions</h3>
+                        <p class="text-gray-600">Stay ahead with our forward-thinking technologies.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">The Technical Idea</h3>
+                    <p class="text-gray-400">Transforming businesses with innovative IT solutions.</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="about.html" class="text-gray-400 hover:text-red-400 transition">About Us</a></li>
+                        <li><a href="services.html" class="text-gray-400 hover:text-red-400 transition">Services</a></li>
+                        <li><a href="portfolio.html" class="text-gray-400 hover:text-red-400 transition">Portfolio</a></li>
+                        <li><a href="contact.html" class="text-gray-400 hover:text-red-400 transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">Contact Us</h3>
+                    <p class="text-gray-400">Email: info@thetechnicalidea.com</p>
+                    <p class="text-gray-400">Phone: +91 (966) 046-0901</p>
+                    <p class="text-gray-400">Address: Vaishali Nagar, Jaipur</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">Follow Us</h3>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-2xl text-gray-400 hover:text-red-400 transition"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-2xl text-gray-400 hover:text-red-400 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-2xl text-gray-400 hover:text-red-400 transition"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center mt-12 text-gray-400">© 2025 The Technical Idea. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            gsap.to(mobileMenu, { height: mobileMenu.classList.contains('hidden') ? 0 : 'auto', duration: 0.5, ease: 'power3.inOut' });
+        });
+
+        // GSAP Animations
+        gsap.from('.animate-hero', { opacity: 0, y: 100, duration: 1.5, ease: 'power4.out' });
+        gsap.from('.animate-hero-delay', { opacity: 0, y: 100, duration: 1.5, delay: 0.5, ease: 'power4.out' });
+        gsap.from('.btn-cta', { opacity: 0, scale: 0.8, duration: 1, delay: 1, ease: 'elastic.out(1, 0.5)' });
+
+        gsap.utils.toArray('.card').forEach((card, i) => {
+            gsap.from(card, {
+                opacity: 0,
+                y: 150,
+                duration: 1,
+                delay: i * 0.2,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        gsap.utils.toArray('.animate-feature').forEach((feature, i) => {
+            gsap.from(feature, {
+                opacity: 0,
+                x: i % 2 === 0 ? -100 : 100,
+                duration: 1.2,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: feature,
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Parallax Background
+        gsap.to('.hero-section', {
+            backgroundPosition: '50% 100%',
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '.hero-section',
+                scrub: true
+            }
+        });
+
+        // Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+    </script>
+</body>
+</html>
